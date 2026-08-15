@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: nextgen-garment-erp-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nextgen-erp-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: '["https://nextgen-garment-erp.onrender.com"]'
+      - key: API_PREFIX
+        value: /api
+
+  - type: web
+    name: nextgen-garment-erp-ui
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://nextgen-garment-erp-api.onrender.com/api
+
+databases:
+  - name: nextgen-erp-db
+    plan: free
+    databaseName: nextgen_erp
+    user: nextgen_erp_user

@@ -1,0 +1,418 @@
+// Updated InventoryItemServiceImpl.java
+
+package com.nextgenmanager.nextgenmanager.items.service;
+
+import com.nextgenmanager.nextgenmanager.common.dto.FilterCriteria;
+import com.nextgenmanager.nextgenmanager.common.model.FileAttachment;
+import com.nextgenmanager.nextgenmanager.common.repository.FileAttachmentRepository;
+import com.nextgenmanager.nextgenmanager.common.service.FileStorageService;
+import com.nextgenmanager.nextgenmanager.items.DTO.InventoryItemDTO;
+import com.nextgenmanager.nextgenmanager.items.mapper.InventoryItemMapper;
+import com.nextgenmanager.nextgenmanager.items.model.InventoryItem;
+import com.nextgenmanager.nextgenmanager.items.model.ItemCode;
+import com.nextgenmanager.nextgenmanager.items.model.ItemCodeSeries;
+import com.nextgenmanager.nextgenmanager.items.repository.InventoryItemRepository;
+import com.nextgenmanager.nextgenmanager.items.repository.ItemCodeSeriesRepository;
+import com.nextgenmanager.nextgenmanager.items.spec.InventoryItemSpecification;
+import com.nextgenmanager.nextgenmanager.production.repository.ItemCodeRepository;
+import okio.FileMetadata;
+import org.hibernate.Hibernate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.Year;
+import java.util.*;
+
+@Service
+public class InventoryItemServiceImpl implements InventoryItemService {
+
+    @Autowired
+    private InventoryItemRepository inventoryItemRepository;
+
+    @Autowired
+    private ItemCodeRepository itemCodeRepository;
+
+    @Autowired
+    private ItemCodeSeriesRepository itemCodeSeriesRepository;
+
+    @Autowired
+    private InventoryItemCodeGenerator codeGenerator;
+
+    @Autowired
+    private FileAttachmentRepository fileAttachmentRepository;
+
+    private final InventoryItemMapper inventoryItemMapper;
+
+    @Autowired
+    public InventoryItemServiceImpl(InventoryItemMapper inventoryItemMapper) {
+        this.inventoryItemMapper = inventoryItemMapper;
+    }
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    private static final Map<String, String> JOIN_FIELD_MAP = Map.of(
+            "dimension", "productSpecification.dimension",
+            "size", "productSpecification.size",
+            "weight", "productSpecification.weight",
+            "basicMaterial", "productSpecification.basicMaterial",
+            "drawingNumber", "productSpecification.drawingNumber"
+    );
+
+    private static final Logger logger = LoggerFactory.getLogger(InventoryItem.class);
+
+    private boolean canAccessFinance() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+        return auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN") ||
+                               a.getAuthority().equals("ROLE_ADMIN") ||
+                               a.getAuthority().equals("ROLE_SALES_ADMIN"));
+    }
+
+    @Override
+    @Transactional
+    public com.nextgenmanager.nextgenmanager.items.model.InventoryItem addInventoryItem(com.nextgenmanager.nextgenmanager.items.model.InventoryItem inventoryItem) {
+        logger.debug("Adding inventory item: {}", inventoryItem);
+        try {
+            if (!canAccessFinance()) {
+                inventoryItem.setProductFinanceSettings(null);
+            }
+            // Generate item code if not provided
+            if (inventoryItem.getItemCode() == null || inventoryItem.getItemCode().isBlank()) {
+                if (inventoryItem.getSeriesId() != null) {
+                    // Series-based generation: use pessimistic lock to atomically increment
+                    ItemCodeSeries series = itemCodeSeriesRepository.findByIdWithLock(inventoryItem.getSeriesId())
+                            .orElseThrow(() -> new IllegalArgumentException("Item code series not found: " + inventoryItem.getSeriesId()));
+                    String generatedCode = series.consumeNextCode();
+                    itemCodeSeriesRepository.save(series);
+                    inventoryItem.setItemCode(generatedCode);
+                } else {
+                    // Legacy year-sequence generator
+                    String generatedCode = codeGenerator.generateItemCode(inventoryItem);
+                    inventoryItem.setItemCode(generatedCode);
+                }
+            }
+
+            InventoryItem savedInventoryItem = inventoryItemRepository.save(inventoryItem);
+            logger.info("Item Successfully added with inventory item id: {}", savedInventoryItem.getInventoryItemId());
+            long itemId = (long)savedInventoryItem.getInventoryItemId();
+            // 2️⃣ Upload and save file metadata if attachments exist
+            if (inventoryItem.getAttachments() != null && !inventoryItem.getAttachments().isEmpty()) {
+                for (MultipartFile file : inventoryItem.getAttachments()) {
+                    fileStorageService.uploadFile(
+                            file,
+                            "inventoryItem",
+                            "inventoryItem",
+                            itemId,
+                            "SYSTEM"
+                    );
+                }
+            }
+
+            // 3️⃣ Fetch uploaded file metadata to send back to UI
+            List<FileAttachment> metadataList = fileAttachmentRepository.findByReferenceTypeAndReferenceId("inventoryItem", itemId);
+            savedInventoryItem.setFileAttachments(metadataList);
+
+            return savedInventoryItem;
+        } catch (Exception e) {
+            logger.error("Error while adding new inventory item: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public com.nextgenmanager.nextgenmanager.items.model.InventoryItem getInventoryItem(int itemId) {
+        logger.debug("Fetching data for id: {}", itemId);
+        try {
+            InventoryItem inventoryItem = inventoryItemRepository.findByActiveId(itemId);
+            List<FileAttachment> metadataList = fileAttachmentRepository.findByReferenceTypeAndReferenceId("inventoryItem", (long) itemId);
+            inventoryItem.setFileAttachments(metadataList);
+            return inventoryItem;
+        } catch (Exception e) {
+            logger.error("Error fetching inventory item with id: {}", itemId);
+            throw new RuntimeException(e);
+        }
+    }
+
+//    @Override
+//    public Page<InventoryItem> getAllInventoryItems(int page, int size, String sortBy, String sortDir, String query) {
+//        logger.debug("Fetching all active inventory items with pagination and sorting");
+//        try {
+//            Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+//                    ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+//            Pageable pageable = PageRequest.of(page, size, sort);
+//            Page<InventoryItem> activeItems = inventoryItemRepository.findAllActiveCategory(query.toLowerCase(), pageable);
+//            if (activeItems.isEmpty()) {
+//                logger.warn("No active inventory items found");
+//            } else {
+//                logger.info("Fetched {} active inventory items", activeItems.getTotalElements());
+//            }
+//            return activeItems;
+//        } catch (Exception e) {
+//            logger.error("Error while fetching all active inventory items: {}", e.getMessage());
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    @Override
+    public Page<InventoryItemDTO> getAllInventoryItems(int page, int size, String sortBy, String sortDir, String query) {
+        logger.debug("Fetching all active inventory items with pagination and sorting");
+
+        try {
+            Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                    ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            Page<InventoryItem> activeItems = inventoryItemRepository.findAllActiveCategory(query.toLowerCase(), pageable);
+
+
+            if (activeItems.isEmpty()) {
+                logger.warn("No active inventory items found");
+            } else {
+                logger.info("Fetched {} active inventory items", activeItems.getTotalElements());
+            }
+
+
+            Page<InventoryItemDTO> dtos = activeItems.map(inventoryItemMapper::toDTO);
+            populateDrawingFileIds(dtos);
+            return dtos;
+
+        } catch (Exception e) {
+            logger.error("Error while fetching all active inventory items: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Override
+    public java.util.List<com.nextgenmanager.nextgenmanager.items.model.InventoryItem> getAllInventoryItemsWithDeleted() {
+        logger.debug("Fetching all inventory items including deleted");
+        try {
+            List<InventoryItem> allItems = inventoryItemRepository.findAll();
+            if (allItems.isEmpty()) {
+                logger.warn("No inventory items found");
+            } else {
+                logger.info("Fetched {} inventory items including deleted", allItems.size());
+            }
+            return allItems;
+        } catch (Exception e) {
+            logger.error("Error while fetching all inventory items with deleted: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteInventoryItem(int itemId) {
+        logger.debug("Deleting inventory item with id: {}", itemId);
+        try {
+            InventoryItem inventoryItem = inventoryItemRepository.findById(itemId)
+                    .orElseThrow(() -> {
+                        logger.warn("No inventory item found with id: {}", itemId);
+                        return new IllegalArgumentException("Item does not exist");
+                    });
+            inventoryItem.setDeletedDate(new Date());
+            inventoryItemRepository.save(inventoryItem);
+            logger.info("Inventory item with id: {} successfully marked as deleted", itemId);
+        } catch (Exception e) {
+            logger.error("Error while deleting inventory item with id: {}: {}", itemId, e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteInventoryItemDb(int itemId) {
+        logger.debug("Permanently removing inventory item with id: {}", itemId);
+        try {
+            inventoryItemRepository.deleteById(itemId);
+            logger.info("Inventory item with id: {} permanently deleted", itemId);
+        } catch (Exception e) {
+            logger.error("Error while permanently deleting inventory item: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void removeDeletedInventoryItemDb() {
+        logger.debug("Removing all soft-deleted inventory items from database");
+        try {
+            List<InventoryItem> deletedItems = inventoryItemRepository.findByDeletedDateIsNotNull();
+            inventoryItemRepository.deleteAll(deletedItems);
+            logger.info("Deleted {} soft-deleted inventory items", deletedItems.size());
+        } catch (Exception e) {
+            logger.error("Error while removing deleted inventory items: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public com.nextgenmanager.nextgenmanager.items.model.InventoryItem editInventoryItem(int itemId, com.nextgenmanager.nextgenmanager.items.model.InventoryItem updatedItem) {
+        logger.debug("Editing inventory item with id: {}", itemId);
+        try {
+            InventoryItem existingItem = inventoryItemRepository.findById(itemId)
+                    .orElseThrow(() -> {
+                        logger.warn("No inventory item found with id: {}", itemId);
+                        return new IllegalArgumentException("Item does not exist");
+                    });
+
+            updatedItem.setInventoryItemId(itemId);
+            updatedItem.setItemCode(existingItem.getItemCode()); // preserve original code
+
+            if (!canAccessFinance()) {
+                com.nextgenmanager.nextgenmanager.items.model.ProductFinanceSettings existingFinance = existingItem.getProductFinanceSettings();
+                if (existingFinance != null) {
+                    existingFinance.setInventoryItem(updatedItem);
+                    updatedItem.setProductFinanceSettings(existingFinance);
+                } else {
+                    updatedItem.setProductFinanceSettings(null);
+                }
+            } else {
+                if (updatedItem.getProductFinanceSettings() != null) {
+                    updatedItem.getProductFinanceSettings().setInventoryItem(updatedItem);
+                }
+            }
+
+            if (updatedItem.getProductSpecification() != null) {
+                updatedItem.getProductSpecification().setInventoryItem(updatedItem);
+            }
+            if (updatedItem.getProductInventorySettings() != null) {
+                updatedItem.getProductInventorySettings().setInventoryItem(updatedItem);
+            }
+
+            InventoryItem newItem = inventoryItemRepository.save(updatedItem);
+
+
+            List<FileAttachment> updatedItemFileAttachments = updatedItem.getFileAttachments();
+            List<FileAttachment> existingFileAttachments =
+                    fileAttachmentRepository.findByReferenceTypeAndReferenceId("inventoryItem", (long) itemId);
+
+
+            for (FileAttachment oldFile : existingFileAttachments) {
+                boolean stillExists = updatedItemFileAttachments.stream()
+                        .anyMatch(newFile -> newFile.getFileName().equals(oldFile.getFileName()));
+                if (!stillExists) {
+                    logger.info("Deleting file removed from UI: {}", oldFile.getFileName());
+                    fileStorageService.deleteAttachment(oldFile.getId());
+                }
+            }
+
+            if (updatedItem.getAttachments() != null && !updatedItem.getAttachments().isEmpty()) {
+                for (MultipartFile file : updatedItem.getAttachments()) {
+                    if (!fileStorageService.existsInStorage(existingFileAttachments, file)) {
+                        fileStorageService.uploadFile(
+                                file,
+                                "inventoryItem",
+                                "inventoryItem",
+                                (long) itemId,
+                                "SYSTEM"
+                        );
+                        logger.info("Uploaded new file: {}", file.getOriginalFilename());
+                    } else {
+                        logger.debug("Skipping existing file: {}", file.getOriginalFilename());
+                    }
+                }
+            }
+            newItem.setFileAttachments(fileAttachmentRepository.findByReferenceTypeAndReferenceId("inventoryItem",(long) itemId));
+            logger.info("Inventory item with id: {} successfully updated", itemId);
+            return newItem;
+        } catch (Exception e) {
+            logger.error("Error while editing inventory item with id: {}: {}", itemId, e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Page<com.nextgenmanager.nextgenmanager.items.model.InventoryItem> searchInventoryItems(String query, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return inventoryItemRepository.searchActiveInventoryItems(query, pageable);
+    }
+
+    @Override
+    public Page<InventoryItemDTO> filterInventoryItems(com.nextgenmanager.nextgenmanager.common.dto.FilterRequest request) {
+        Sort.Direction direction = Sort.Direction.fromString(request.getSortDir()); // safer
+        String sortBy = request.getSortBy();
+        if (JOIN_FIELD_MAP.containsKey(sortBy)) {
+            sortBy = JOIN_FIELD_MAP.get(sortBy);
+        }
+        Sort sort = Sort.by(direction, sortBy);
+
+        List<FilterCriteria> filters = request.getFilters();
+        FilterCriteria filterDeleteDateIsNull = new FilterCriteria("deletedDate", "=", null);
+        filters.add(filterDeleteDateIsNull);
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sort);
+        Specification<com.nextgenmanager.nextgenmanager.items.model.InventoryItem> spec = InventoryItemSpecification.buildSpecification(filters,JOIN_FIELD_MAP);
+        Page<com.nextgenmanager.nextgenmanager.items.model.InventoryItem> inventoryItems =inventoryItemRepository.findAll(spec, pageable);
+
+        Page<InventoryItemDTO> dtos = inventoryItems.map(inventoryItemMapper::toDTO);
+        populateDrawingFileIds(dtos);
+        return dtos;
+    }
+
+    private void populateDrawingFileIds(Page<InventoryItemDTO> dtos) {
+        if (dtos.isEmpty()) return;
+
+        List<Long> ids = dtos.stream()
+                .map(d -> (long) d.getInventoryItemId())
+                .toList();
+
+        List<FileAttachment> allAttachments = fileAttachmentRepository.findByReferenceTypeAndReferenceIdIn("inventoryItem", ids);
+
+        Map<Long, List<FileAttachment>> attachmentMap = new HashMap<>();
+        for (FileAttachment fa : allAttachments) {
+            attachmentMap.computeIfAbsent(fa.getReferenceId(), k -> new ArrayList<>()).add(fa);
+        }
+
+        for (InventoryItemDTO dto : dtos) {
+            List<FileAttachment> attachments = attachmentMap.get((long) dto.getInventoryItemId());
+            if (attachments != null && !attachments.isEmpty()) {
+                // Heuristic: Find attachment matching drawingNumber, or first one
+                FileAttachment drawing = attachments.stream()
+                        .filter(a -> dto.getDrawingNumber() != null && !dto.getDrawingNumber().isBlank() &&
+                                a.getOriginalName().toLowerCase().contains(dto.getDrawingNumber().toLowerCase()))
+                        .findFirst()
+                        .orElse(attachments.get(0));
+                dto.setDrawingFileId(drawing.getId());
+            }
+        }
+    }
+
+    @Override
+    public String generateUniqueCode() {
+        int year = Year.now().getValue();
+        Integer latestSeq = itemCodeRepository.findMaxSequenceForYear(year);
+        int newSeq = (latestSeq != null ? latestSeq + 1 : 1);
+
+        String code = String.format("PEC%d%04d", year, newSeq);  // e.g. PEC20250001
+
+        // Save to database
+        ItemCode newEntry = new ItemCode();
+        newEntry.setYear(year);
+        newEntry.setSequenceNumber(newSeq);
+        newEntry.setCode(code);
+        itemCodeRepository.save(newEntry);
+
+        return code;
+    }
+
+    @Override
+    public boolean checkItemCodeExists(String itemCode) {
+        if (itemCode == null || itemCode.isBlank()) return false;
+        return inventoryItemRepository.existsByItemCodeAndDeletedDateIsNull(itemCode.trim());
+    }
+}

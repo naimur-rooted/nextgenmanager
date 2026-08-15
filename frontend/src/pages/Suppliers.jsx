@@ -1,0 +1,62 @@
+import { useEffect, useState } from 'react'
+import api from '../services/api'
+import DataTable from '../components/ui/DataTable'
+import Modal from '../components/ui/Modal'
+
+export default function Suppliers() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
+  const [form, setForm] = useState({ name: '', code: '', contact_person: '', email: '', phone: '', address: '', payment_terms: '' })
+
+  const load = () => {
+    setLoading(true)
+    api.get('/suppliers').then((res) => setData(res.data)).catch(console.error).finally(() => setLoading(false))
+  }
+
+  useEffect(load, [])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    await api.post('/suppliers', form)
+    setIsOpen(false)
+    setForm({})
+    load()
+  }
+
+  const columns = [
+    { key: 'code', label: 'Code' },
+    { key: 'name', label: 'Name' },
+    { key: 'contact_person', label: 'Contact' },
+    { key: 'email', label: 'Email' },
+    { key: 'phone', label: 'Phone' },
+    { key: 'payment_terms', label: 'Payment Terms' },
+  ]
+
+  return (
+    <div>
+      <DataTable
+        columns={columns}
+        data={data}
+        loading={loading}
+        addLabel="Add Supplier"
+        onAdd={() => setIsOpen(true)}
+      />
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Add Supplier">
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <input className="input" placeholder="Code *" required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
+          <input className="input" placeholder="Name *" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input className="input" placeholder="Contact Person" value={form.contact_person} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} />
+          <input className="input" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input className="input" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input className="input" placeholder="Payment Terms" value={form.payment_terms} onChange={(e) => setForm({ ...form, payment_terms: e.target.value })} />
+          <input className="input col-span-2" placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+          <div className="col-span-2 flex justify-end gap-2">
+            <button type="button" onClick={() => setIsOpen(false)} className="btn-secondary">Cancel</button>
+            <button type="submit" className="btn-primary">Save</button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  )
+}
