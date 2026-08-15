@@ -53,9 +53,19 @@ class UserOut(BaseModel):
     full_name: str
     role: Role
     is_active: bool
+    must_change_password: bool = False
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PasswordResetRequest(BaseModel):
+    new_password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
 
 
 # ---------- Master Data ----------

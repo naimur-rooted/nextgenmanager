@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -6,7 +7,15 @@ from app.api.deps import get_current_user, require_roles
 from app.core.security import create_access_token, verify_password, get_password_hash
 from app.db.session import get_db
 from app.models.user import Role, User
-from app.schemas.schemas import LoginRequest, Token, UserCreate, UserOut, UserUpdate
+from app.schemas.schemas import (
+    LoginRequest,
+    Token,
+    UserCreate,
+    UserOut,
+    UserUpdate,
+    PasswordResetRequest,
+    ChangePasswordRequest,
+)
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -20,14 +29,22 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="Incorrect username or password",
         )
     if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is inactive")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is deactivated. Contact System Administrator.")
 
     token = create_access_token(user.id)
     return Token(access_token=token)
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
-def register(payload: UserCreate, db: Session = Depends(get_db)):
+def register(
+    payload: UserCreate,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_roles(Role.ADMIN)),
+):
+    """
+    Provision a new employee ERP account.
+    Restricted strictly to System Administrator.
+    """
     existing = (
         db.query(User)
         .filter((User.username == payload.username) | (User.email == payload.email))
@@ -42,11 +59,24 @@ def register(payload: UserCreate, db: Session = Depends(get_db)):
         full_name=payload.full_name,
         hashed_password=get_password_hash(payload.password),
         role=payload.role,
+        must_change_password=True,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/users", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+def create_user(
+    payload: UserCreate,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_roles(Role.ADMIN)),
+):
+    """
+    System Administrator provision account endpoint.
+    """
+    return register(payload, db, admin_user)
 
 
 @router.get("/me", response_model=UserOut)
@@ -56,10 +86,40 @@ def get_me(current_user: User = Depends(get_current_user)):
 
 @router.get("/users", response_model=list[UserOut])
 def list_users(
+    role: Optional[Role] = None,
+    search: Optional[str] = None,
+    is_active: Optional[bool] = None,
     db: Session = Depends(get_db),
     _: User = Depends(require_roles(Role.ADMIN)),
 ):
-    return db.query(User).all()
+    """
+    List all ERP system accounts. System Administrator only.
+    """
+    query = db.query(User)
+    if role:
+        query = query.filter(User.role == role)
+    if is_active is not None:
+        query = query.filter(User.is_active == is_active)
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            (User.username.ilike(search_pattern))
+            | (User.full_name.ilike(search_pattern))
+            | (User.email.ilike(search_pattern))
+        )
+    return query.order_by(User.id.asc()).all()
+
+
+@router.get("/users/{user_id}", response_model=UserOut)
+def get_user_detail(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles(Role.ADMIN)),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 
 @router.put("/users/{user_id}", response_model=UserOut)
@@ -82,3 +142,42 @@ def update_user(
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/users/{user_id}/reset-password", response_model=UserOut)
+def reset_user_password(
+    user_id: int,
+    payload: PasswordResetRequest,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles(Role.ADMIN)),
+):
+    """
+    System Administrator initiates password reset / temporary password assignment.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.hashed_password = get_password_hash(payload.new_password)
+    user.must_change_password = True
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.post("/change-password")
+def change_my_password(
+    payload: ChangePasswordRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Logged-in user changes their password.
+    """
+    if not verify_password(payload.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+
+    current_user.hashed_password = get_password_hash(payload.new_password)
+    current_user.must_change_password = False
+    db.commit()
+    return {"message": "Password changed successfully"}

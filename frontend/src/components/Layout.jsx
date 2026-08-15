@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   Users,
+  UserCog,
   Truck,
   Shirt,
   Boxes,
@@ -24,73 +25,119 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../auth/AuthContext'
 
-const navSections = [
-  {
-    title: 'Overview',
-    items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }],
-  },
-  {
-    title: 'Master Data',
-    items: [
-      { to: '/buyers', label: 'Buyers', icon: Users },
-      { to: '/suppliers', label: 'Suppliers', icon: Truck },
-      { to: '/styles', label: 'Styles', icon: Shirt },
-      { to: '/materials', label: 'Materials', icon: Boxes },
-      { to: '/colors', label: 'Colors', icon: Palette },
-      { to: '/sizes', label: 'Sizes', icon: Ruler },
-    ],
-  },
-  {
-    title: 'Merchandising',
-    items: [
-      { to: '/orders', label: 'Buyer Orders', icon: ShoppingCart },
-      { to: '/tna', label: 'TNA', icon: CalendarClock },
-    ],
-  },
-  {
-    title: 'BOM',
-    items: [
-      { to: '/boms', label: 'BOM', icon: Package },
-      { to: '/material-requirements', label: 'Material Requirements', icon: ClipboardCheck },
-    ],
-  },
-  {
-    title: 'Procurement',
-    items: [
-      { to: '/requisitions', label: 'Purchase Requisitions', icon: Receipt },
-      { to: '/purchase-orders', label: 'Purchase Orders', icon: ShoppingCart },
-      { to: '/goods-receipts', label: 'Goods Receipts', icon: Package },
-    ],
-  },
-  {
-    title: 'Inventory',
-    items: [{ to: '/inventory', label: 'Inventory', icon: Boxes }],
-  },
-  {
-    title: 'Production',
-    items: [
-      { to: '/production-plans', label: 'Production Plans', icon: CalendarClock },
-      { to: '/cutting', label: 'Cutting', icon: Scissors },
-      { to: '/sewing', label: 'Sewing', icon: Layers },
-      { to: '/finishing', label: 'Finishing', icon: Sparkles },
-    ],
-  },
-  {
-    title: 'Quality',
-    items: [{ to: '/quality', label: 'Quality Control', icon: ShieldCheck }],
-  },
-  {
-    title: 'Packing & Shipment',
-    items: [
-      { to: '/packing', label: 'Packing', icon: PackageCheck },
-      { to: '/shipments', label: 'Shipments', icon: Ship },
-    ],
-  },
-  {
+const getNavSections = (role) => {
+  const sections = [
+    {
+      title: 'Overview',
+      items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }],
+    },
+  ]
+
+  // Administration (System Administrator only)
+  if (role === 'Admin') {
+    sections.push({
+      title: 'Administration',
+      items: [{ to: '/users', label: 'User Management', icon: UserCog }],
+    })
+  }
+
+  // Master Data
+  if (['Admin', 'Merchandiser', 'Planner', 'Purchase Manager', 'Inventory Manager', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Master Data',
+      items: [
+        { to: '/buyers', label: 'Buyers', icon: Users },
+        { to: '/suppliers', label: 'Suppliers', icon: Truck },
+        { to: '/styles', label: 'Styles', icon: Shirt },
+        { to: '/materials', label: 'Materials', icon: Boxes },
+        { to: '/colors', label: 'Colors', icon: Palette },
+        { to: '/sizes', label: 'Sizes', icon: Ruler },
+      ],
+    })
+  }
+
+  // Merchandising
+  if (['Admin', 'Merchandiser', 'Planner', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Merchandising',
+      items: [
+        { to: '/orders', label: 'Buyer Orders', icon: ShoppingCart },
+        { to: '/tna', label: 'TNA', icon: CalendarClock },
+      ],
+    })
+  }
+
+  // BOM
+  if (['Admin', 'Merchandiser', 'Planner', 'Management'].includes(role)) {
+    sections.push({
+      title: 'BOM & MRP',
+      items: [
+        { to: '/boms', label: 'BOM', icon: Package },
+        { to: '/material-requirements', label: 'Material Requirements', icon: ClipboardCheck },
+      ],
+    })
+  }
+
+  // Procurement
+  if (['Admin', 'Purchase Manager', 'Inventory Manager', 'Warehouse Manager', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Procurement',
+      items: [
+        { to: '/requisitions', label: 'Purchase Requisitions', icon: Receipt },
+        { to: '/purchase-orders', label: 'Purchase Orders', icon: ShoppingCart },
+        { to: '/goods-receipts', label: 'Goods Receipts', icon: Package },
+      ],
+    })
+  }
+
+  // Inventory
+  if (['Admin', 'Inventory Manager', 'Warehouse Manager', 'Production Manager', 'Planner', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Inventory',
+      items: [{ to: '/inventory', label: 'Inventory', icon: Boxes }],
+    })
+  }
+
+  // Production
+  if (['Admin', 'Production Manager', 'Planner', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Production',
+      items: [
+        { to: '/production-plans', label: 'Production Plans', icon: CalendarClock },
+        { to: '/cutting', label: 'Cutting', icon: Scissors },
+        { to: '/sewing', label: 'Sewing', icon: Layers },
+        { to: '/finishing', label: 'Finishing', icon: Sparkles },
+      ],
+    })
+  }
+
+  // Quality
+  if (['Admin', 'Quality Inspector', 'Production Manager', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Quality',
+      items: [{ to: '/quality', label: 'Quality Control', icon: ShieldCheck }],
+    })
+  }
+
+  // Packing & Shipment
+  if (['Admin', 'Warehouse Manager', 'Inventory Manager', 'Management'].includes(role)) {
+    sections.push({
+      title: 'Packing & Shipment',
+      items: [
+        { to: '/packing', label: 'Packing', icon: PackageCheck },
+        { to: '/shipments', label: 'Shipments', icon: Ship },
+      ],
+    })
+  }
+
+  // Analytics
+  sections.push({
     title: 'Analytics',
     items: [{ to: '/reports', label: 'Reports', icon: BarChart3 }],
-  },
-]
+  })
+
+  return sections
+}
 
 function Layout() {
   const navigate = useNavigate()
@@ -101,6 +148,8 @@ function Layout() {
     logout()
     navigate('/login')
   }
+
+  const navSections = getNavSections(user?.role)
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -142,7 +191,9 @@ function Layout() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-white">{user?.full_name}</p>
-              <p className="text-xs text-gray-500">{user?.role}</p>
+              <p className="text-xs text-gray-500">
+                {user?.role === 'Admin' ? 'System Administrator' : user?.role}
+              </p>
             </div>
             <button
               onClick={handleLogout}

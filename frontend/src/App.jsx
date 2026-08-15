@@ -26,10 +26,27 @@ import Packing from './pages/Packing'
 import Shipments from './pages/Shipments'
 import TNA from './pages/TNA'
 import Reports from './pages/Reports'
+import UserManagement from './pages/UserManagement'
 
 function ProtectedRoute({ children }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
+  return children
+}
+
+function AdminRoute({ children }) {
+  const { user } = useAuth()
+  if (!user) return <Navigate to="/login" replace />
+  if (user.role !== 'Admin') {
+    return (
+      <div className="p-8 text-center bg-white rounded-lg shadow border border-gray-200">
+        <h2 className="text-xl font-bold text-red-600 mb-2">403 - Access Denied</h2>
+        <p className="text-gray-600 text-sm">
+          User Management is restricted to System Administrators only.
+        </p>
+      </div>
+    )
+  }
   return children
 }
 
@@ -46,6 +63,14 @@ function App() {
         }
       >
         <Route index element={<Dashboard />} />
+        <Route
+          path="users"
+          element={
+            <AdminRoute>
+              <UserManagement />
+            </AdminRoute>
+          }
+        />
         <Route path="buyers" element={<Buyers />} />
         <Route path="suppliers" element={<Suppliers />} />
         <Route path="styles" element={<Styles />} />
