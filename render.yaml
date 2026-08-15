@@ -29,7 +29,7 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://nextgen-garment-erp-api.onrender.com/api
+        value: https://nextgenmanagerdb.onrender.com/api
 
 databases:
   - name: nextgen-erp-db
