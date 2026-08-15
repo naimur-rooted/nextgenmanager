@@ -16,7 +16,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        value: '["https://nextgen-garment-erp.onrender.com"]'
+        value: '["https://nextgenmanagerui.onrender.com","https://nextgen-garment-erp.onrender.com","http://localhost:3000","http://localhost:5173"]'
       - key: API_PREFIX
         value: /api
 
