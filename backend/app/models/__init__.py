@@ -21,9 +21,7 @@ from app.models.procurement import (
 )
 from app.models.production import (
     ProductionPlan,
-    ProductionPlanItem,
     WorkOrder,
-    WorkOrderOperation,
     CuttingEntry,
     SewingEntry,
     FinishingEntry,
@@ -57,9 +55,7 @@ __all__ = [
     "GoodsReceipt",
     "GoodsReceiptItem",
     "ProductionPlan",
-    "ProductionPlanItem",
     "WorkOrder",
-    "WorkOrderOperation",
     "CuttingEntry",
     "SewingEntry",
     "FinishingEntry",
