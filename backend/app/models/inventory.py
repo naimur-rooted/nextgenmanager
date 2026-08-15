@@ -45,7 +45,7 @@ class StockBalance(TimestampMixin, Base):
 class InventoryTransaction(TimestampMixin, Base):
     __tablename__ = "inventory_transactions"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
     transaction_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True)
     transaction_type: Mapped[TransactionType] = mapped_column(SAEnum(TransactionType, name="transaction_type", native_enum=False), nullable=False)
     material_id: Mapped[int | None] = mapped_column(ForeignKey("materials.id"), index=True)
