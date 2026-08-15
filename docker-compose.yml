@@ -4,8 +4,8 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: siddhant
-      POSTGRES_DB: nextgenmanager
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nextgen_erp
     ports:
       - "5432:5432"
     extra_hosts:
@@ -29,27 +29,27 @@ services:
       - postgres
       - minio
     ports:
-      - "8080:8080"
+      - "8000:8000"
     environment:
-      DATASOURCE_URL: jdbc:postgresql://postgres:5432/nextgenmanager
-      DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: siddhant
-      JWT_SECRET: change-this-to-a-random-64-character-string-for-production!!
-      MINIO_URL: http://minio:9000
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-      MINIO_BUCKET_NAME: nextgenmanager
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/nextgen_erp
+      SECRET_KEY: change-this-to-a-long-random-secret-key
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      CORS_ORIGINS: '["http://localhost:3000","https://nextgen-garment-erp.onrender.com"]'
       FRONTEND_URL: http://localhost:3000
+      DEBUG: "false"
+      API_PREFIX: /api
 
   frontend:
     build:
-      context: ../nextgenmanagerui
-      args:
-        REACT_APP_API_URL: ${API_URL:-http://localhost:8080/api}
+      context: ./frontend
     depends_on:
       - app
     ports:
       - "3000:80"
+    environment:
+      VITE_API_URL: http://localhost:8000/api
 
 volumes:
-  minio_data:
+  minio_data:</arg_value>
+</write_to_file></tool_call>

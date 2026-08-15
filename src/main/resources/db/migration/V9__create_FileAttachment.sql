@@ -1,2 +1,0 @@
-ALTER TABLE fileAttachment
-ADD COLUMN presignedUrlCreationDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP;

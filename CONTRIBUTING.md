@@ -17,16 +17,18 @@ Thank you for your interest in contributing to NextGenManager! This guide will h
 
 ## Development Setup
 
-See the [Quick Start](README.md#quick-start) section in the README for full setup instructions. In short:
+See the [Installation](README.md#installation) section in the README for full setup instructions. In short:
 
 ```bash
 # Backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
 
 # Frontend (separate terminal)
-cd ../ui
+cd ../frontend
 npm install
-npm start
+npm run dev
 ```
 
 ## How to Contribute
@@ -36,7 +38,7 @@ npm start
 - Check [existing issues](https://github.com/siddhant2411/nextgenmanager/issues) first to avoid duplicates
 - Use the **Bug Report** issue template
 - Include steps to reproduce, expected behavior, and actual behavior
-- Include your environment details (OS, Java version, browser)
+- Include your environment details (OS, Python version, browser)
 
 ### Suggesting Features
 
@@ -47,8 +49,8 @@ npm start
 ### Submitting Code
 
 1. Make sure your code follows the existing patterns in the codebase
-2. Each module follows: **Model > Repository > Service (Interface + Impl) > Controller > DTO > Mapper**
-3. Add Flyway migrations for any database changes (never edit existing migrations)
+2. Each module follows: **Model > Schema > Service > Router > Dependencies**
+3. Add Alembic migrations for any database changes (never edit existing migrations)
 4. Test your changes locally before submitting
 5. Keep commits focused and write clear commit messages
 
@@ -56,25 +58,25 @@ npm start
 
 1. Update the PR description with a summary of your changes
 2. Link any related issues
-3. Make sure the build passes: `./mvnw clean package`
+3. Make sure the build passes: `pip install -r requirements.txt`
 4. Keep PRs focused -- one feature or fix per PR
 5. Be responsive to review feedback
 
 ## Code Guidelines
 
-### Backend (Java/Spring Boot)
+### Backend (Python/FastAPI)
 
 - Follow existing package structure and naming conventions
-- Use MapStruct for entity-to-DTO mapping
-- Use Lombok annotations (`@Data`, `@Builder`, etc.) to reduce boilerplate
-- Soft-delete records using the `deletedDate` field -- never hard-delete
-- Column names use exact field names (no auto snake_case conversion)
-- Add `@Operation` and `@ApiResponse` Swagger annotations to new endpoints
+- Use SQLAlchemy models for database entities
+- Use Pydantic schemas for request/response validation
+- Use Alembic for database migrations
+- Soft-delete records using the `is_active` field -- never hard-delete
+- Add docstrings to new endpoints for automatic API documentation
 
 ### Database
 
-- Flyway migration files go in `src/main/resources/db/migration/`
-- Naming: `V{next_number}__description.sql`
+- Alembic migration files go in `backend/alembic/versions/`
+- Naming: `{version_number}__description.py`
 - **Never modify existing migration files** -- always create a new one
 - Use PostgreSQL-compatible SQL
 
@@ -103,4 +105,5 @@ Open a [Discussion](https://github.com/siddhant2411/nextgenmanager/discussions) 
 
 ---
 
-By contributing, you agree that your contributions will be licensed under the Apache License 2.0.
+By contributing, you agree that your contributions will be licensed under the Apache License 2.0.</arg_value>
+</write_to_file></tool_call>

@@ -1,2 +1,0 @@
-ALTER TABLE bomPosition ADD COLUMN scrapPercentage DECIMAL(5,2) NOT NULL DEFAULT 0.00;
-

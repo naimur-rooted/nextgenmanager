@@ -1,2 +1,0 @@
-ALTER TABLE productFinanceSettings
-    ADD COLUMN IF NOT EXISTS gstRate DOUBLE PRECISION;

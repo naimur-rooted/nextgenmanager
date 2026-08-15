@@ -1,39 +1,63 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
 
-### IntelliJ IDEA ###
-.idea
+# Python cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+### FastAPI / Uvicorn ###
+*.log
+logs/
+
+### Database ###
+*.db
+*.sqlite3
+*.sqlite3-journal
+
+### Environment ###
+.env
+.env.local
+.env.*.local
+
+### IDE ###
+.vscode/
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-/.env
-/.ervprod
-/.claude/
+### OS ###
+.DS_Store
+Thumbs.db
 
 ### Analysis & temp files ###
 ACTION_CHECKLIST.md
@@ -75,3 +99,5 @@ application-docker.properties
 
 /bulk_import/
 /scratch/
+</arg_value>
+</write_to_file></tool_call>

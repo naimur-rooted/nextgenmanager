@@ -14,8 +14,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Java-17-orange?logo=openjdk&logoColor=white" alt="Java 17"/>
-  <img src="https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen?logo=springboot&logoColor=white" alt="Spring Boot"/>
+  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white" alt="Python 3.11"/>
+  <img src="https://img.shields.io/badge/FastAPI-0.115.6-009688?logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/React-18.3-blue?logo=react&logoColor=white" alt="React 18"/>
   <img src="https://img.shields.io/badge/PostgreSQL-17-blue?logo=postgresql&logoColor=white" alt="PostgreSQL"/>
   <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License"/>
@@ -161,7 +161,7 @@ docker-compose up --build
 | Service | URL |
 |---------|-----|
 | UI | `http://localhost:3000` |
-| Backend API | `http://localhost:8080` |
+| Backend API | `http://localhost:8000` |
 | MinIO Console | `http://localhost:9001` (minioadmin / minioadmin) |
 
 After MinIO is up, open `http://localhost:9001` and create a bucket named **`nextgenmanager`**.
@@ -187,14 +187,14 @@ Replace `YOUR_SERVER_IP` with your actual IP address or domain name:
 
 ```bash
 cd nextgenmanager
-API_URL=http://YOUR_SERVER_IP:8080/api docker-compose up --build -d
+API_URL=http://YOUR_SERVER_IP:8000/api docker-compose up --build -d
 ```
 
 Or create a `.env` file next to `docker-compose.yml` so you don't have to repeat it:
 
 ```bash
 # nextgenmanager/.env
-API_URL=http://YOUR_SERVER_IP:8080/api
+API_URL=http://YOUR_SERVER_IP:8000/api
 ```
 
 Then just run:
@@ -206,10 +206,10 @@ docker-compose up --build -d
 | Service | URL |
 |---------|-----|
 | UI | `http://YOUR_SERVER_IP:3000` |
-| Backend API | `http://YOUR_SERVER_IP:8080` |
+| Backend API | `http://YOUR_SERVER_IP:8000` |
 | MinIO Console | `http://YOUR_SERVER_IP:9001` |
 
-> **Before going live** — change the default `POSTGRES_PASSWORD`, `MINIO_ROOT_PASSWORD`, and `SECURITY_JWT_SECRET` values in `docker-compose.yml` to strong secrets.
+> **Before going live** — change the default `POSTGRES_PASSWORD`, `MINIO_ROOT_PASSWORD`, and `SECRET_KEY` values in `docker-compose.yml` to strong secrets.
 
 ---
 
@@ -221,7 +221,7 @@ Complete guide to set up **both the backend and the frontend** on your machine.
 
 | Software | Version | Download |
 |----------|---------|----------|
-| **Java JDK** | 17 or higher | [Download](https://adoptium.net/) |
+| **Python** | 3.11+ | [Download](https://www.python.org/downloads/) |
 | **Node.js** | 18+ (includes npm) | [Download](https://nodejs.org/) |
 | **PostgreSQL** | 15 or higher | [Download](https://www.postgresql.org/download/) |
 | **MinIO** | Latest | [Download](https://min.io/download) |
@@ -233,7 +233,7 @@ git clone https://github.com/siddhant2411/nextgenmanagerui.git
 ```
 
 #### Step 2: Configure & Start
-Detailed steps for [Backend Setup](nextgenmanager/README.md) and [Frontend Setup](nextgenmanagerui/README.md).
+Detailed steps for [Backend Setup](backend/README.md) and [Frontend Setup](nextgenmanagerui/README.md).
 
 ---
 
@@ -241,8 +241,9 @@ Detailed steps for [Backend Setup](nextgenmanager/README.md) and [Frontend Setup
 
 Once the backend is running, interactive API documentation is available at:
 
-- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
-- **OpenAPI JSON:** `http://localhost:8080/v3/api-docs`
+- **Swagger UI:** `http://localhost:8000/docs`
+- **ReDoc:** `http://localhost:8000/redoc`
+- **OpenAPI JSON:** `http://localhost:8000/api/openapi.json`
 
 All endpoints are grouped by module and require a JWT bearer token obtained from `POST /api/auth/login`.
 

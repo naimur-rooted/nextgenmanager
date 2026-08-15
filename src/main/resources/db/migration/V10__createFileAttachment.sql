@@ -1,2 +1,0 @@
-ALTER TABLE fileAttachment
-ALTER COLUMN presignedUrl TYPE VARCHAR(2048);

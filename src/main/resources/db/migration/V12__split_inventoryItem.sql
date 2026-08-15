@@ -1,6 +1,0 @@
-ALTER TABLE productInventorySettings
-ALTER COLUMN minStock DROP NOT NULL,
-ALTER COLUMN reorderLevel DROP NOT NULL,
-ALTER COLUMN maxStock  DROP NOT NULL,
-ALTER COLUMN availableQuantity DROP NOT NULL,
-ALTER COLUMN orderedQuantity DROP NOT NULL;

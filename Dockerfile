@@ -1,22 +1,23 @@
 # Build Stage
-FROM maven:3.8.4-openjdk-17 AS build
+FROM python:3.11-slim AS build
 
 WORKDIR /app
 
-COPY pom.xml .
-RUN mvn dependency:go-offline
-
-COPY src ./src
-
-RUN mvn clean package -DskipTests
+COPY backend/requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Run Stage
-FROM eclipse-temurin:17-jdk-jammy
+FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=build /app/target/nextgenmanager-0.0.1-SNAPSHOT.jar .
+COPY --from=build /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
 
-EXPOSE 8080
+COPY backend/ ./backend/
+WORKDIR /app/backend
 
-ENTRYPOINT ["java", "-jar", "/app/nextgenmanager-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]</arg_value>
+</write_to_file></tool_call>
