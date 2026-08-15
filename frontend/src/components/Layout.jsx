@@ -11,7 +11,7 @@ import {
   ShoppingCart,
   ClipboardCheck,
   Scissors,
-  Stitch,
+  Layers,
   Sparkles,
   ShieldCheck,
   Package,
@@ -71,7 +71,7 @@ const navSections = [
     items: [
       { to: '/production-plans', label: 'Production Plans', icon: CalendarClock },
       { to: '/cutting', label: 'Cutting', icon: Scissors },
-      { to: '/sewing', label: 'Sewing', icon: Stitch },
+      { to: '/sewing', label: 'Sewing', icon: Layers },
       { to: '/finishing', label: 'Finishing', icon: Sparkles },
     ],
   },
