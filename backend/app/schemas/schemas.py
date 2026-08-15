@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import date, datetime
 from decimal import Decimal
 from typing import List, Optional
@@ -476,6 +478,19 @@ class PurchaseOrderCreate(BaseModel):
     items: List[POItemCreate] = []
 
 
+class PurchaseOrderItemOut(BaseModel):
+    id: int
+    material_id: int
+    quantity: Decimal
+    received_qty: Decimal
+    unit_price: Decimal
+    uom: str
+    material_code: Optional[str] = None
+    material_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PurchaseOrderOut(BaseModel):
     id: int
     po_number: str
@@ -489,19 +504,6 @@ class PurchaseOrderOut(BaseModel):
     created_at: datetime
     supplier_name: Optional[str] = None
     items: List[PurchaseOrderItemOut] = []
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class PurchaseOrderItemOut(BaseModel):
-    id: int
-    material_id: int
-    quantity: Decimal
-    received_qty: Decimal
-    unit_price: Decimal
-    uom: str
-    material_code: Optional[str] = None
-    material_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
