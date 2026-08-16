@@ -1,109 +1,90 @@
-# Contributing to NextGenManager
+# Contributing to BloomWorks Garment ERP
 
-Thank you for your interest in contributing to NextGenManager! This guide will help you get started.
+Thank you for your interest in contributing to BloomWorks Garment ERP! This guide will help you get started with our codebase, architecture, and development workflow.
 
-## Getting Started
+---
 
-1. **Fork** the repository on GitHub
+## 🚀 Getting Started
+
+1. **Fork** the repository on GitHub:
+   `https://github.com/naimur-rooted/nextgenmanager`
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/nextgenmanager.git
+   git clone https://github.com/naimur-rooted/nextgenmanager.git
    cd nextgenmanager
    ```
-3. **Create a branch** for your work:
+3. **Create a branch** for your feature or bugfix:
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
-## Development Setup
+---
 
-See the [Installation](README.md#installation) section in the README for full setup instructions. In short:
+## 🛠️ Local Development Setup
+
+Refer to `README.md` for full stack details. Quick start:
 
 ```bash
-# Backend
+# Backend Setup (Python 3.13 / FastAPI)
 cd backend
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m alembic upgrade head
+python seed.py
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-# Frontend (separate terminal)
+# Frontend Setup (React / Vite / Tailwind CSS) - in a separate terminal
 cd ../frontend
 npm install
 npm run dev
 ```
 
-## How to Contribute
+---
 
-### Reporting Bugs
+## 📐 Architecture & Code Guidelines
 
-- Check [existing issues](https://github.com/siddhant2411/nextgenmanager/issues) first to avoid duplicates
-- Use the **Bug Report** issue template
-- Include steps to reproduce, expected behavior, and actual behavior
-- Include your environment details (OS, Python version, browser)
+### 1. Backend Architecture (Python 3.13 + FastAPI)
+- **Pattern:** Follow the existing modular structure: **Model $\rightarrow$ Schema $\rightarrow$ Service $\rightarrow$ Router $\rightarrow$ Dependencies**.
+- **Database:** SQLAlchemy 2.0 ORM with PostgreSQL. All models extend `TimestampMixin` and `Base`.
+- **Validation:** Pydantic 2.0 schemas for request/response DTOs.
+- **Authentication:** OAuth2 Password bearer token flow with JWT.
+- **Role-Based Access Control (RBAC):** Use `require_roles(*roles: Role)` dependency on routers to enforce administrative and operational permission boundaries.
+- **Audit & Account Security:** Deactivate accounts via `is_active = False` rather than hard-deleting records.
 
-### Suggesting Features
+### 2. Database & Migrations
+- All database schema changes **MUST** be managed via Alembic in `backend/alembic/versions/`.
+- Never modify existing migration files—always create a new sequential migration:
+  ```bash
+  python -m alembic revision -m "add_new_feature_table"
+  ```
+- Keep all migrations compatible with both PostgreSQL and SQLite (used for in-memory testing).
 
-- Use the **Feature Request** issue template
-- Explain the use case and why it would be valuable for manufacturers
-- Be specific about the expected behavior
-
-### Submitting Code
-
-1. Make sure your code follows the existing patterns in the codebase
-2. Each module follows: **Model > Schema > Service > Router > Dependencies**
-3. Add Alembic migrations for any database changes (never edit existing migrations)
-4. Test your changes locally before submitting
-5. Keep commits focused and write clear commit messages
-
-### Pull Request Process
-
-1. Update the PR description with a summary of your changes
-2. Link any related issues
-3. Make sure the build passes: `pip install -r requirements.txt`
-4. Keep PRs focused -- one feature or fix per PR
-5. Be responsive to review feedback
-
-## Code Guidelines
-
-### Backend (Python/FastAPI)
-
-- Follow existing package structure and naming conventions
-- Use SQLAlchemy models for database entities
-- Use Pydantic schemas for request/response validation
-- Use Alembic for database migrations
-- Soft-delete records using the `is_active` field -- never hard-delete
-- Add docstrings to new endpoints for automatic API documentation
-
-### Database
-
-- Alembic migration files go in `backend/alembic/versions/`
-- Naming: `{version_number}__description.py`
-- **Never modify existing migration files** -- always create a new one
-- Use PostgreSQL-compatible SQL
-
-### Frontend (React)
-
-- Components go in `src/components/`
-- Pages go in `src/pages/`
-- API calls go through service files in `src/services/`
-- Use Material-UI components for consistency
-- Form validation with Formik + Yup
-
-## Good First Issues
-
-Look for issues labeled [`good first issue`](https://github.com/siddhant2411/nextgenmanager/labels/good%20first%20issue) -- these are great entry points for new contributors.
-
-Some areas that always welcome help:
-- Documentation improvements
-- UI/UX refinements
-- Test coverage
-- Bug fixes
-- Translations
-
-## Questions?
-
-Open a [Discussion](https://github.com/siddhant2411/nextgenmanager/discussions) or comment on the relevant issue. We're happy to help you get started.
+### 3. Frontend Architecture (React 18 + Vite 6 + Tailwind CSS)
+- **UI Components:** Modular components in `src/components/` and `src/components/ui/` (DataTable, Modal, etc.).
+- **Pages:** Module views in `src/pages/`.
+- **API Services:** Axios client with base interceptors in `src/services/api.js`.
+- **Icons:** Use `lucide-react` icons exclusively.
 
 ---
 
-By contributing, you agree that your contributions will be licensed under the Apache License 2.0.</arg_value>
-</write_to_file></tool_call>
+## 🧪 Submitting Changes
+
+1. Verify backend submodules import cleanly:
+   ```powershell
+   python -c "import pkgutil, importlib, app; [importlib.import_module(n) for _, n, _ in pkgutil.walk_packages(app.__path__, 'app.')]; print('OK')"
+   ```
+2. Run database seed to verify idempotency:
+   ```bash
+   python seed.py
+   ```
+3. Verify frontend production build:
+   ```bash
+   cd frontend
+   npm run build
+   ```
+4. Commit your changes with clear, descriptive messages and open a Pull Request.
+
+---
+
+Thank you for helping build **BloomWorks Garment ERP**!</tool_call>
