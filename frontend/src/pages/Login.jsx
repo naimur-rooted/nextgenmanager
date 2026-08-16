@@ -29,7 +29,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">NextGen Garment ERP</h1>
+            <h1 className="text-2xl font-bold text-gray-900">BloomWorks Garment ERP</h1>
             <p className="text-gray-500 mt-1">Sign in to your account</p>
           </div>
           <form onSubmit={handleSubmit}>

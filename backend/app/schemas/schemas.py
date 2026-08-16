@@ -635,6 +635,26 @@ class FinishingEntryCreate(CuttingEntryCreate):
     pass
 
 
+class CuttingEntryOut(BaseModel):
+    id: int
+    work_order_id: int
+    entry_date: date
+    quantity: int
+    rejection_qty: int
+    operator: Optional[str] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SewingEntryOut(CuttingEntryOut):
+    pass
+
+
+class FinishingEntryOut(CuttingEntryOut):
+    pass
+
+
 # ---------- Quality ----------
 class DefectCreate(BaseModel):
     defect_type: str

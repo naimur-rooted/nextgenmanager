@@ -26,7 +26,7 @@ export default function Dashboard() {
   if (!data) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 font-medium">
-        Loading NextGen Garments ERP Dashboard...
+        Loading BloomWorks Garments ERP Dashboard...
       </div>
     )
   }
@@ -38,7 +38,7 @@ export default function Dashboard() {
       {/* Role Banner */}
       <div className="bg-gradient-to-r from-blue-900 to-indigo-800 text-white p-4 rounded-lg shadow flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold">NextGen Garments Ltd. — Factory ERP</h2>
+          <h2 className="text-xl font-bold">BloomWorks Garments Ltd. — Factory ERP</h2>
           <p className="text-xs text-blue-200 mt-0.5">
             Logged in as <span className="font-semibold text-white">{user?.full_name}</span> (
             {role === 'Admin' ? 'System Administrator' : role})

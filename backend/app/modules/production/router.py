@@ -16,10 +16,13 @@ from app.models.production import (
 from app.models.user import User
 from app.schemas.schemas import (
     CuttingEntryCreate,
+    CuttingEntryOut,
     FinishingEntryCreate,
+    FinishingEntryOut,
     ProductionPlanCreate,
     ProductionPlanOut,
     SewingEntryCreate,
+    SewingEntryOut,
     WorkOrderCreate,
     WorkOrderOut,
 )
@@ -178,6 +181,18 @@ def complete_work_order(wo_id: int, db: Session = Depends(get_db), _: User = Dep
 
 
 # ---------- Cutting ----------
+@cutting_router.get("", response_model=list[CuttingEntryOut])
+def list_cutting_entries(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    entries = db.query(CuttingEntry).order_by(CuttingEntry.id.desc()).all()
+    out = []
+    for e in entries:
+        obj = CuttingEntryOut.model_validate(e)
+        wo = db.query(WorkOrder).filter(WorkOrder.id == e.work_order_id).first()
+        obj.wo_number = wo.wo_number if wo else None
+        out.append(obj)
+    return out
+
+
 @cutting_router.post("", status_code=201)
 def create_cutting_entry(
     payload: CuttingEntryCreate,
@@ -199,6 +214,18 @@ def create_cutting_entry(
 
 
 # ---------- Sewing ----------
+@sewing_router.get("", response_model=list[SewingEntryOut])
+def list_sewing_entries(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    entries = db.query(SewingEntry).order_by(SewingEntry.id.desc()).all()
+    out = []
+    for e in entries:
+        obj = SewingEntryOut.model_validate(e)
+        wo = db.query(WorkOrder).filter(WorkOrder.id == e.work_order_id).first()
+        obj.wo_number = wo.wo_number if wo else None
+        out.append(obj)
+    return out
+
+
 @sewing_router.post("", status_code=201)
 def create_sewing_entry(
     payload: SewingEntryCreate,
@@ -220,6 +247,18 @@ def create_sewing_entry(
 
 
 # ---------- Finishing ----------
+@finishing_router.get("", response_model=list[FinishingEntryOut])
+def list_finishing_entries(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    entries = db.query(FinishingEntry).order_by(FinishingEntry.id.desc()).all()
+    out = []
+    for e in entries:
+        obj = FinishingEntryOut.model_validate(e)
+        wo = db.query(WorkOrder).filter(WorkOrder.id == e.work_order_id).first()
+        obj.wo_number = wo.wo_number if wo else None
+        out.append(obj)
+    return out
+
+
 @finishing_router.post("", status_code=201)
 def create_finishing_entry(
     payload: FinishingEntryCreate,

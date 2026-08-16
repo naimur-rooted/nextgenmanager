@@ -1,298 +1,113 @@
-<h1 align="center">NextGenManager</h1>
+# BloomWorks Garment ERP
 
-<p align="center">
-  <strong>Open-source Manufacturing ERP built for Indian MSMEs</strong>
-</p>
-
-<p align="center">
-  <a href="#why-nextgenmanager">Why NextGenManager</a> &bull;
-  <a href="#features">Features</a> &bull;
-  <a href="#installation">Installation</a> &bull;
-  <a href="#api-docs">API Docs</a> &bull;
-  <a href="#roadmap">Roadmap</a> &bull;
-  <a href="#contributing">Contributing</a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white" alt="Python 3.11"/>
-  <img src="https://img.shields.io/badge/FastAPI-0.115.6-009688?logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/React-18.3-blue?logo=react&logoColor=white" alt="React 18"/>
-  <img src="https://img.shields.io/badge/PostgreSQL-17-blue?logo=postgresql&logoColor=white" alt="PostgreSQL"/>
-  <img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0 License"/>
-  <br>
-  <img src="https://img.shields.io/github/stars/siddhant2411/nextgenmanager?style=social" alt="GitHub Stars"/>
-  <img src="https://img.shields.io/github/forks/siddhant2411/nextgenmanager?style=social" alt="GitHub Forks"/>
-  <img src="https://img.shields.io/github/issues/siddhant2411/nextgenmanager" alt="Open Issues"/>
-</p>
+An Enterprise Resource Planning (ERP) software system designed for garment manufacturing and export factories (RMG sector). Built with FastAPI (Python 3.13), PostgreSQL, SQLAlchemy 2.0, and React (Vite, Tailwind CSS).
 
 ---
 
-<p align="center">
-  <img src="docs/assets/demo.gif" alt="NextGenManager — Login to Work Order full flow" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Full walkthrough: login → dashboard → work order creation and management.</em></p>
+## 🌟 Key Features & Operational Modules
 
-<p align="center">
-  <a href="https://github.com/siddhant2411/nextgenmanager/stargazers"><strong>⭐ Star this repo</strong></a> if you find it useful — it helps others discover the project!
-</p>
-
----
-
-## Why NextGenManager?
-
-India has over **6.3 crore MSMEs** that form the backbone of the manufacturing sector. Yet most small and mid-size manufacturers still run on Excel sheets, WhatsApp groups, and paper registers — because existing ERP solutions are either too expensive or too complex to set up.
-
-**NextGenManager is built specifically with Indian manufacturers in mind:**
-
-- **GST & MSME compliant** — Contact records support GSTIN, MSME registration numbers, and PAN out of the box.
-- **Premium Card-Based Design** — Say goodbye to dense, clunky tables. Experience a modern, intuitive layout built to increase user adoption on the shop floor.
-- **Job Work Challans** — Built-in support for subcontracting workflows common in Indian manufacturing.
-- **Multi-address with GST** — Manage multiple factory/godown addresses per vendor or customer, each with their own GSTIN.
-- **Runs on modest hardware** — No need for expensive cloud infrastructure. Runs on a basic laptop or a Rs. 500/month VPS.
-- **Zero license cost** — Free and open-source forever. No per-user fees, no hidden charges, no vendor lock-in.
+- **User Management & RBAC:** Role-Based Access Control (RBAC) supporting 9 distinct garment factory roles. Account provisioning managed exclusively by System Administrators.
+- **Master Data Management:** Buyers, Suppliers, Styles, Style Variants, Colors, Sizes, Materials.
+- **Merchandising & Order Management:** Buyer Orders, Time & Action (TNA) Milestone Tracking.
+- **BOM & Material Requirements (MRP):** Garment Bill of Materials, automated material consumption and shortage calculations.
+- **Procurement & Goods Receipt:** Purchase Requisitions (PR), Vendor Purchase Orders (PO), Goods Receipts (GR), Inventory Stock Balances.
+- **Production Line Floor Tracking:** Production Planning, Work Orders, Line Execution for **Cutting**, **Sewing**, and **Finishing**.
+- **Quality Control (QC):** Inspection Auditing (AQL 2.5), Defect Logging (Open Seams, Oil Stains, Broken Stitches), Pass/Fail Ratios.
+- **Packing & Logistics:** Packing Lists, Carton Assortment, Export Shipping & Vessel Tracking.
 
 ---
 
-## Strategic Decision Support
+## 👥 Role-Specific Demo Credentials at a Glance
 
-<p align="center">
-  <img src="docs/assets/make_or_buy.png" alt="Make or Buy Analysis Tool" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em><strong>Make vs Buy Analysis:</strong> Helps small manufacturers decide whether to produce in-house or outsource — a daily decision in Indian shop floors.</em></p>
+All demo accounts use the standard password `demo123` (except System Administrator, which uses `admin123`).
 
----
-
-## Beautiful, Intuitive UI for High Adoption
-
-<p align="center">
-  <img src="docs/assets/inventory_dashboard.png" alt="Inventory Operational Health" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Modern Inventory tracking with "Operational Health" vitals and supply chain bottleneck management.</em></p>
-
----
-
-## Features
-
-### Production & Manufacturing
-
-<p align="center">
-  <img src="docs/assets/work_order.png" alt="Production Costing & Work Order Management" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Real-time cost tracking and production management with a modern, card-based interface.</em></p>
-
-<p align="center">
-  <img src="docs/assets/bom_flow.png" alt="BOM Visual Flow & Routing" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Visual manufacturing routing: Define operations, work centers, and parallel execution paths.</em></p>
-
-- **Bill of Materials (BOM)** — Multi-level BOMs with versioning, cost breakdown, where-used analysis, and ECO tracking.
-- **Work Orders** — Create from BOM, track material issuance, operation progress, and state transitions.
-- **Routing & Operations** — Define manufacturing processes with sequences, setup/cycle times, and parallel operations.
-- **Production Scheduling** — Schedule operations against work centers with capacity planning and shift management.
-
-### Sales & Quotations
-
-<p align="center">
-  <img src="docs/assets/quotation_hub.png" alt="Quotation Hub" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Review, track, and manage professional proposals with ease.</em></p>
-
-- **Enquiries** — Capture and track customer inquiries.
-- **Quotations** — Create premium sales quotations with auto-populating items and dynamic tax configurations.
-- **Sales Orders** — Full sales order lifecycle with PDF generation.
-- **Job Work Challans** — Subcontracting management with challan tracking.
-
-### Inventory & Items
-
-<p align="center">
-  <img src="docs/assets/stock_register.png" alt="Live Stock Register" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Monitor live availability, tracking types (Batch/Serial), and inventory settings across all SKUs.</em></p>
-
-<p align="center">
-  <img src="docs/assets/product_master.png" alt="Product Master" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Product Master: Centralized catalog for managing raw materials, semi-finished, and finished goods.</em></p>
-
-<p align="center">
-  <img src="docs/assets/bom_details.png" alt="BOM Components & Details" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Detailed BOM management: Component tracking, revision comparison, and change logs.</em></p>
-
-### Procurement & Purchasing
-
-<p align="center">
-  <img src="docs/assets/purchase_orders.png" alt="Purchase Orders" width="100%" style="border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-</p>
-<p align="center"><em>Procurement pipeline: Manage purchase orders, vendor approvals, and receiving workflows.</em></p>
-
-- **Purchase Orders** — Vendor approvals, receiving workflows, and PO-to-GRN tracking.
-
-### Accounting & Compliance
-
-Full Indian-compliance accounting stack built directly into the ERP — no separate Tally sync required.
-
-- **Chart of Accounts & Vouchers** — Configurable CoA with a statutory voucher system (journal, payment, receipt, contra) and an approval framework.
-- **Auto-Posting from Operations** — Sales and purchase transactions post to the ledger automatically (AR/AP), keeping books in sync with the shop floor.
-- **Perpetual Inventory** — Real-time stock-to-GL reconciliation, so inventory value on the books always matches physical stock movement.
-- **GST Compliance** — GST register, HSN summary, and GSTR-1 / GSTR-3B return generation.
-- **TDS** — TDS at time of payment, section-wise tracking, and challan/26Q reporting.
-- **Opening Balances & Financial Years** — Mid-year opening balance entry and financial year period management.
-- **Accounting Reports** — Built-in reporting across ledgers, GST, and TDS.
+| Role Name | System Username | Password | Full Name & Title | Responsibilities & Access |
+| :--- | :--- | :--- | :--- | :--- |
+| **System Administrator** | `admin` | `admin123` | System Administrator | User Management (`/users`), Master Config, Full Access |
+| **Merchandiser** | `merchandiser` | `demo123` | Sarah Ahmed (Sr. Merchandiser) | Buyers, Orders, TNA, Styles, BOM, MRP |
+| **Production Manager** | `production` | `demo123` | Tariqul Islam (Production Mgr) | Production Plans, Work Orders, Floor Progress |
+| **Cutting Supervisor** | `cutting` | `demo123` | Kamal Hosain (Cutting Supv) | Work Orders, Cutting Output, Cut Loss Logs |
+| **Sewing Supervisor** | `sewing` | `demo123` | Nasrin Akter (Sewing Line Supv) | Work Orders, Sewing Output, Line Efficiency |
+| **Finishing Supervisor** | `finishing` | `demo123` | Rafiqul Alam (Finishing Supv) | Work Orders, Ironing, Folding, Finishing Output |
+| **Quality Inspector** | `quality` | `demo123` | Monir Hossain (Chief QC Inspector)| QC Inspections, Defect Logging, AQL Audits |
+| **Store / Inventory Officer**| `inventory` | `demo123` | Abul Kalam (Store Officer) | Stock Balances, Material Issues, Warehouse |
+| **Procurement Officer** | `procurement` | `demo123` | Farhana Yasmin (Procurement) | Purchase Requisitions, Supplier POs, GR |
 
 ---
 
-## Installation
+## 🛠️ Technology Stack
 
-### Option 1: Docker Compose — Local Machine
+- **Backend:** Python 3.13, FastAPI, SQLAlchemy 2.0, Alembic, Passlib (Bcrypt), PyJWT, Uvicorn, Gunicorn.
+- **Database:** PostgreSQL (Render Managed) / SQLite (Local Development).
+- **Frontend:** React 18, Vite 6, Tailwind CSS, Lucide Icons, Axios, React Router v6.
+- **Deployment:** Render Cloud Platform (Backend Web Service + Static Site Frontend + PostgreSQL).
 
-The easiest way to get NextGenManager up and running on your laptop.
+---
 
-```bash
-# 1. Clone both repositories into the same parent folder
-git clone https://github.com/siddhant2411/nextgenmanager.git
-git clone https://github.com/siddhant2411/nextgenmanagerui.git
+## 🚀 Connected Garment Export Order Lifecycle Workflow
 
-# 2. Fire up the full platform (backend + frontend + postgres + minio)
-cd nextgenmanager
-docker-compose up --build
+```
+[1. BUYER]           H&M Demo Buyer (Code: BUY-001, Sweden)
+      │
+[2. STYLE]           NG-POLO-001 — Men's Classic Cotton Pique Polo Shirt
+      │
+[3. BUYER ORDER]     PO-2026-001 (10,000 Pcs @ $6.50/pc = $65,000 USD)
+      │
+[4. TNA PLAN]        10 Milestones (Booking -> Fabric -> Trims -> Cutting -> Sewing -> Shipment)
+      │
+[5. GARMENT BOM]     0.25 kg Pique Fabric, 3 Buttons, Labels, Poly Bag, Carton
+      │
+[6. MRP CALC]        2,625 kg Fabric, 30,600 Buttons, 10,100 Labels, 10,200 Poly Bags
+      │
+[7. PROCUREMENT]     PR-2026-001 -> PO-PUR-001 (ABC Textile Mills) & PO-PUR-002 (Dhaka Accessories)
+      │
+[8. GOODS RECEIPT]   GR-2026-001 (2,700 kg Fabric Received & Inspected into Stock)
+      │
+[9. INVENTORY]       Stock Balances updated (2,700 kg Fabric, 35,000 Buttons, 105 Cartons)
+      │
+[10. PRODUCTION]     PLAN-2026-001 -> 4 Work Orders (WO-2026-001-S to XL)
+      │
+[11. CUTTING]        10,200 Pcs Cut, 200 Rejected (Net 10,000 Pcs Cut Output)
+      │
+[12. SEWING]         9,850 Pcs Sewn across Sewing Line 01
+      │
+[13. FINISHING]      9,700 Pcs Finished, Ironed & Folded
+      │
+[14. QUALITY (QC)]   QC-2026-001 (9,700 Inspected, 9,450 Passed, 250 Failed/Defect Logged)
+      │
+[15. PACKING]        PACK-2026-001 (9,450 Pcs packed into 95 7-Ply Export Cartons)
+      │
+[16. SHIPMENT]       SHIP-2026-001 (Maersk Line Vessel, Chittagong Port -> Gothenburg, Sweden)
 ```
 
-| Service | URL |
-|---------|-----|
-| UI | `http://localhost:3000` |
-| Backend API | `http://localhost:8000` |
-| MinIO Console | `http://localhost:9001` (minioadmin / minioadmin) |
-
-After MinIO is up, open `http://localhost:9001` and create a bucket named **`nextgenmanager`**.
-
 ---
 
-### Option 2: Docker Compose — Remote Server / VPS
+## 💻 Local Development Setup
 
-Use this when deploying to a cloud VM or any server with a public IP or domain.
-
-The React frontend bakes the API URL at **build time**, so you must pass your server's address before building.
-
-#### Step 1: On your server, clone both repos side by side
-
+### 1. Backend Setup
 ```bash
-git clone https://github.com/siddhant2411/nextgenmanager.git
-git clone https://github.com/siddhant2411/nextgenmanagerui.git
+cd backend
+python -m venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+pip install -r requirements.txt
+python -m alembic upgrade head
+python seed.py
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-#### Step 2: Set your server's API URL and start
-
-Replace `YOUR_SERVER_IP` with your actual IP address or domain name:
-
+### 2. Frontend Setup
 ```bash
-cd nextgenmanager
-API_URL=http://YOUR_SERVER_IP:8000/api docker-compose up --build -d
+cd frontend
+npm install
+npm run dev
 ```
 
-Or create a `.env` file next to `docker-compose.yml` so you don't have to repeat it:
-
-```bash
-# nextgenmanager/.env
-API_URL=http://YOUR_SERVER_IP:8000/api
-```
-
-Then just run:
-
-```bash
-docker-compose up --build -d
-```
-
-| Service | URL |
-|---------|-----|
-| UI | `http://YOUR_SERVER_IP:3000` |
-| Backend API | `http://YOUR_SERVER_IP:8000` |
-| MinIO Console | `http://YOUR_SERVER_IP:9001` |
-
-> **Before going live** — change the default `POSTGRES_PASSWORD`, `MINIO_ROOT_PASSWORD`, and `SECRET_KEY` values in `docker-compose.yml` to strong secrets.
-
 ---
 
-### Option 3: Manual Setup (Development)
-
-Complete guide to set up **both the backend and the frontend** on your machine.
-
-#### Prerequisites
-
-| Software | Version | Download |
-|----------|---------|----------|
-| **Python** | 3.11+ | [Download](https://www.python.org/downloads/) |
-| **Node.js** | 18+ (includes npm) | [Download](https://nodejs.org/) |
-| **PostgreSQL** | 15 or higher | [Download](https://www.postgresql.org/download/) |
-| **MinIO** | Latest | [Download](https://min.io/download) |
-
-#### Step 1: Clone Repositories
-```bash
-git clone https://github.com/siddhant2411/nextgenmanager.git
-git clone https://github.com/siddhant2411/nextgenmanagerui.git
-```
-
-#### Step 2: Configure & Start
-Detailed steps for [Backend Setup](backend/README.md) and [Frontend Setup](nextgenmanagerui/README.md).
-
----
-
-## API Docs
-
-Once the backend is running, interactive API documentation is available at:
-
-- **Swagger UI:** `http://localhost:8000/docs`
-- **ReDoc:** `http://localhost:8000/redoc`
-- **OpenAPI JSON:** `http://localhost:8000/api/openapi.json`
-
-All endpoints are grouped by module and require a JWT bearer token obtained from `POST /api/auth/login`.
-
----
-
-## Roadmap
-
-### In Progress
-- [ ] Financial statements (P&L, Balance Sheet, Cash Flow), bank reconciliation, and FY year-end close.
-- [ ] Quality Control (QC) inspection workflows.
-- [ ] Save Filters for users
-- [ ] Complete MCP Support
-
-### Planned
-- [ ] Mobile-responsive PWA for shop floor use.
-
----
-
-## Contributing
-
-Contributions are very welcome! Whether you're fixing a bug, adding a feature, or improving documentation:
-
-1. **Find an issue** — Check the [issue tracker](https://github.com/siddhant2411/nextgenmanager/issues).
-2. **Fork & Branch** — Create a feature branch for your changes.
-3. **Open a PR** — Describe your changes clearly in the pull request.
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
-
----
-
-## Support & Contact
-
-- **Email:** siddhantmavani1@gmail.com
-- **GitHub Issues:** [Open an issue](https://github.com/siddhant2411/nextgenmanager/issues) for bugs or feature requests
-
----
-
-## License
-
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  Built in India, for Indian manufacturers — and for manufacturers everywhere.
-</p>
-
-<p align="center">
-  <a href="https://github.com/siddhant2411/nextgenmanager/stargazers">⭐ Star this repo</a> &bull;
-  <a href="https://github.com/siddhant2411/nextgenmanager/issues">Report a Bug</a> &bull;
-  <a href="https://github.com/siddhant2411/nextgenmanager/issues">Request a Feature</a>
-</p>
+## 🌐 Live Deployment URLs
+- **Frontend App:** [https://nextgenmanagerui.onrender.com/login](https://nextgenmanagerui.onrender.com/login)
+- **Backend API Docs:** [https://nextgenmanagerdb.onrender.com/docs](https://nextgenmanagerdb.onrender.com/docs)
