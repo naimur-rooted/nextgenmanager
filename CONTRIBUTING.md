@@ -7,11 +7,11 @@ Thank you for your interest in contributing to BloomWorks Garment ERP! This guid
 ## 🚀 Getting Started
 
 1. **Fork** the repository on GitHub:
-   `https://github.com/naimur-rooted/nextgenmanager`
+   `https://github.com/naimur-rooted/BloomWorks_Garment_ERP`
 2. **Clone** your fork locally:
    ```bash
-   git clone https://github.com/naimur-rooted/nextgenmanager.git
-   cd nextgenmanager
+   git clone https://github.com/naimur-rooted/BloomWorks_Garment_ERP.git
+   cd BloomWorks_Garment_ERP
    ```
 3. **Create a branch** for your feature or bugfix:
    ```bash

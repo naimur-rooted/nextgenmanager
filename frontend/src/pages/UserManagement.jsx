@@ -139,9 +139,8 @@ export default function UserManagement() {
       label: 'Account Status',
       render: (row) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-          }`}
+          className={`px-2 py-1 rounded-full text-xs font-semibold ${row.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}
         >
           {row.is_active ? 'Active' : 'Inactive / Deactivated'}
         </span>
